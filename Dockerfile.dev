@@ -1,0 +1,17 @@
+FROM golang:1.24
+
+WORKDIR /app
+ENV GOBIN="/usr/local/go/bin"
+
+RUN go install github.com/air-verse/air@latest
+RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+COPY go.mod ./
+
+RUN if [ -f go.sum ]; then cp go.sum go.sum; fi
+RUN go mod download
+
+COPY . .
+
+EXPOSE 8080
+
+CMD ["go", "run", "."]

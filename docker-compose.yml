@@ -1,0 +1,16 @@
+services:
+  discord-vad-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    command: sh -c "go get && air"
+    volumes:
+      - .:/app
+      - ./go:/go
+    container_name: discord-vad-backend
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - GIN_MODE=debug
+      - PORT=8080

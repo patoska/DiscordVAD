@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Discord Overlay</title>
+  <style>
+    body { margin: 0; background: transparent; font-family: sans-serif; color: white; }
+    .user {
+      display: flex; align-items: center;
+      margin: 5px 0; padding: 5px 10px;
+      background: rgba(0,0,0,0.5); border-radius: 10px;
+      transition: background 0.3s ease;
+    }
+    .user.speaking {
+      background: rgba(0, 200, 0, 0.7);
+      box-shadow: 0 0 10px lime;
+    }
+    img {
+      width: 32px; height: 32px; border-radius: 50%; margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="users"></div>
+  <script>
+    let users = [];
+    let ws = null;
+
+    function connect() {
+      ws = new WebSocket("ws://localhost:8080/ws");
+      ws.onmessage = (event) => {
+        users = JSON.parse(event.data);
+        const container = document.getElementById("users");
+        container.innerHTML = "";
+        let now = Date.now();
+        users.forEach(u => {
+          const div = document.createElement("div");
+          let last_activity = (new Date(u.last_activity)).getTime();
+          let diff = now - last_activity;
+          div.id = u.id
+          div.className = "user" + (last_activity > 0 && diff < 200 ? " speaking" : "");
+          div.innerHTML = `<img src="${u.avatar}"/> <span>${u.name}</span>`;
+          container.appendChild(div);
+        });
+      };
+      ws.onerror = function(event) {
+        console.error('WebSocket error:', event);
+        console.error('Trying in 5 seconds...');
+        setTimeout(function(){
+          ws.close();
+          connect();
+        }, 10000);
+      }
+    }
+
+    connect();
+
+    let interval = setInterval(function(){
+      let now = Date.now();
+      users.forEach(u => {
+        let last_activity = (new Date(u.last_activity)).getTime();
+        let diff = now - last_activity;
+        div = document.getElementById(u.id);
+        div.className = "user" + (last_activity > 0 && diff < 200 ? " speaking" : "");
+      });
+    },200);
+
+
+  </script>
+</body>
+</html>
