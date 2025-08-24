@@ -4,11 +4,9 @@ import (
 	"fmt"
 	"os"
 	"time"
-	"net/http"
 	"sync"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/gorilla/websocket"
 	"github.com/joho/godotenv"
 )
 
@@ -16,7 +14,6 @@ var (
 	Token          = ""
 	GuildID        = ""
 	ChannelID      = ""
-	upgrader       = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}
 	users          = make(map[string]*User)
 	ssrcMap        = make(map[uint32]string)
 	usersMux       sync.Mutex
@@ -77,7 +74,6 @@ func connectDiscord() (*discordgo.Session, error) {
 	session, err := discordgo.New("Bot " + Token)
 	if err != nil {
 		return nil, err
-		fmt.Println("")
 	}
 
 	session.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsGuildVoiceStates)
